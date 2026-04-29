@@ -171,7 +171,7 @@
 
         async function loadAttendance() {
             try {
-                const res = await fetch('../api/attendance.php?action=list');
+                const res = await fetch('../api/attendance.php?action=list', { cache: 'no-store' });
                 const data = await res.json();
                 if (data.success) {
                     allAttendance = data.attendance;

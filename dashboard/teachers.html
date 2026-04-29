@@ -201,7 +201,7 @@
 
         async function loadTeachers() {
             try {
-                const response = await fetch('../api/students.php?action=list_teachers');
+                const response = await fetch('../api/students.php?action=list_teachers', { cache: 'no-store' });
                 const data = await response.json();
                 if (data.success && data.teachers && data.teachers.length > 0) {
                     allTeachers = data.teachers;

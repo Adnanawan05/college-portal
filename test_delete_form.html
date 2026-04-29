@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <h1>Delete Student Test</h1>
+    <form action="api/students.php" method="POST">
+        <input type="hidden" name="action" value="delete_student">
+        <label>Student ID to delete:</label>
+        <input type="number" name="id" required>
+        <button type="submit">Delete Student</button>
+    </form>
+    <p>Check the response after clicking delete. If you are not logged in, it will show "Not authenticated".</p>
+</body>
+</html>

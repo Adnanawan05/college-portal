@@ -361,9 +361,11 @@
                     showToast('Student deleted successfully!');
                     loadStudents();
                 } else {
+                    alert('Deletion failed: ' + (data.message || 'Unknown error'));
                     showToast(data.message || 'Deletion failed', true);
                 }
             } catch(e) {
+                alert('Connection error: ' + e.message);
                 showToast('Connection error', true);
             }
         }

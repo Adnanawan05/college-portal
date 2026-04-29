@@ -98,6 +98,14 @@ elseif ($action == 'update_student') {
 
 elseif ($action == 'delete_student') {
     $id = $_POST['id'] ?? '';
+    error_log("Delete student called with ID: $id");
+    
+    if (empty($id)) {
+        error_log("No student ID provided");
+        echo json_encode(['success' => false, 'message' => 'No student ID provided']);
+        exit;
+    }
+
     try {
         $conn->beginTransaction();
         
@@ -105,18 +113,37 @@ elseif ($action == 'delete_student') {
         $stmt->execute(['id' => $id]);
         $student = $stmt->fetch();
         
-        if ($student) {
-            $userId = $student['user_id'];
-            // Delete user (will cascade to students table due to foreign key)
-            $stmt = $conn->prepare("DELETE FROM users WHERE id = :user_id");
-            $stmt->execute(['user_id' => $userId]);
+        if (!$student) {
+            error_log("Student record not found for ID: $id");
+            $conn->rollBack();
+            echo json_encode(['success' => false, 'message' => 'Student record not found in database']);
+            exit;
+        }
+        
+        $userId = $student['user_id'];
+        error_log("Found student. User ID: $userId");
+        
+        // Delete user (will cascade to students table due to foreign key)
+        $stmt = $conn->prepare("DELETE FROM users WHERE id = :user_id");
+        $stmt->execute(['user_id' => $userId]);
+        
+        $deleted = $stmt->rowCount();
+        error_log("Rows deleted from users: $deleted");
+        
+        if ($deleted == 0) {
+            error_log("User account not found for User ID: $userId");
+            $conn->rollBack();
+            echo json_encode(['success' => false, 'message' => 'User account not found or already deleted']);
+            exit;
         }
         
         $conn->commit();
-        echo json_encode(['success' => true, 'message' => 'Student deleted successfully']);
+        error_log("Deletion successful for ID: $id");
+        echo json_encode(['success' => true, 'message' => 'Student and associated user account deleted successfully']);
     } catch(PDOException $e) {
-        $conn->rollBack();
-        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        error_log("Database error during deletion: " . $e->getMessage());
+        if ($conn->inTransaction()) $conn->rollBack();
+        echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
     }
 }
 

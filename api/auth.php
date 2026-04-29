@@ -218,9 +218,14 @@ elseif ($action == 'check_session') {
             'name' => $_SESSION['name']
         ];
         
+        if ($_SESSION['role'] === 'parent' || $_SESSION['role'] === 'student') {
+            $database = new Database();
+            $conn = $database->getConnection();
+        }
+        
         if ($_SESSION['role'] === 'parent') {
             try {
-                $stmt = $conn->prepare("SELECT student_name, class FROM students WHERE parent_id = :parent_id");
+                $stmt = $conn->prepare("SELECT student_name, `class` FROM students WHERE parent_id = :parent_id");
                 $stmt->execute(['parent_id' => $_SESSION['user_id']]);
                 $children = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 $response['children'] = $children;
@@ -229,7 +234,7 @@ elseif ($action == 'check_session') {
             }
         } elseif ($_SESSION['role'] === 'student') {
             try {
-                $stmt = $conn->prepare("SELECT student_name, class FROM students WHERE user_id = :user_id");
+                $stmt = $conn->prepare("SELECT student_name, `class` FROM students WHERE user_id = :user_id");
                 $stmt->execute(['user_id' => $_SESSION['user_id']]);
                 $student = $stmt->fetch(PDO::FETCH_ASSOC);
                 if ($student) {

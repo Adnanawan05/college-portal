@@ -211,12 +211,35 @@ elseif ($action == 'logout') {
 
 elseif ($action == 'check_session') {
     if (isset($_SESSION['user_id'])) {
-        echo json_encode([
+        $response = [
             'success' => true,
             'logged_in' => true,
             'role' => $_SESSION['role'],
             'name' => $_SESSION['name']
-        ]);
+        ];
+        
+        if ($_SESSION['role'] === 'parent') {
+            try {
+                $stmt = $conn->prepare("SELECT student_name, class FROM students WHERE parent_id = :parent_id");
+                $stmt->execute(['parent_id' => $_SESSION['user_id']]);
+                $children = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                $response['children'] = $children;
+            } catch(PDOException $e) {
+                // Ignore errors for this specific optional data
+            }
+        } elseif ($_SESSION['role'] === 'student') {
+            try {
+                $stmt = $conn->prepare("SELECT student_name, class FROM students WHERE user_id = :user_id");
+                $stmt->execute(['user_id' => $_SESSION['user_id']]);
+                $student = $stmt->fetch(PDO::FETCH_ASSOC);
+                if ($student) {
+                    $response['student_name'] = $student['student_name'];
+                    $response['class'] = $student['class'];
+                }
+            } catch(PDOException $e) {}
+        }
+        
+        echo json_encode($response);
     } else {
         echo json_encode(['success' => true, 'logged_in' => false]);
     }

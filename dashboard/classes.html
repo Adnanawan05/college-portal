@@ -146,6 +146,19 @@
             // Only admin/teacher can see Edit/Delete; only admin can Add
             if (data.role === 'admin') {
                 document.getElementById('addBtn').style.display = 'flex';
+            } else if (data.role === 'student') {
+                if (data.class) {
+                    allClasses = demoClasses.filter(c => c.name === data.class);
+                }
+            } else if (data.role === 'parent') {
+                if (data.children && data.children.length > 0) {
+                    const childClasses = data.children.map(c => c.class);
+                    allClasses = demoClasses.filter(c => childClasses.includes(c.name));
+                    
+                    if (allClasses.length === 0) {
+                         allClasses = demoClasses.slice(0, 1); // Mock fallback
+                    }
+                }
             }
             renderTable(allClasses);
             loadNotifications();

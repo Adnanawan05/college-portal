@@ -143,6 +143,21 @@
 
             if (data.role === 'student') {
                 document.getElementById('pageDesc').textContent = 'Your academic performance and grades.';
+                if (data.student_name) {
+                    allGrades = demoGrades.filter(g => g.name === data.student_name);
+                }
+            } else if (data.role === 'parent') {
+                document.getElementById('pageDesc').textContent = "Your child's academic performance and grades.";
+                if (data.children && data.children.length > 0) {
+                    const childNames = data.children.map(c => c.student_name);
+                    allGrades = demoGrades.filter(g => childNames.includes(g.name));
+                    
+                    // If demo data doesn't match real children, show some demo data anyway for preview purposes,
+                    // but ideally it should be empty if no match. We will use a fallback for demo purposes.
+                    if (allGrades.length === 0) {
+                         allGrades = demoGrades.slice(0, 2); // Show first 2 as mock for parent
+                    }
+                }
             }
             renderTable(allGrades);
             loadNotifications();

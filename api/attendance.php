@@ -30,7 +30,7 @@ if ($action == 'list') {
             $query .= " WHERE s.user_id = :user_id";
             $params['user_id'] = $userId;
         } elseif ($role == 'parent') {
-            $query .= " WHERE s.parent_id = (SELECT id FROM parents WHERE user_id = :user_id)";
+            $query .= " WHERE s.parent_id = :user_id";
             $params['user_id'] = $userId;
         }
         

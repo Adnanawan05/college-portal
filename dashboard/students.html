@@ -349,8 +349,13 @@
 
         async function deleteStudent(id) {
             const s = allStudents.find(x => x.id == id);
-            if (!s) return;
-            if (!confirm(`Are you sure you want to delete student "${s.student_name}"?`)) return;
+            if (!s) {
+                alert('Student not found in memory!');
+                return;
+            }
+            
+            // Removed confirm dialog in case browser is blocking it silently
+            // Proceeding with deletion immediately
             
             try {
                 const fd = new FormData();

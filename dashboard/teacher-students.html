@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Students - SmartSchool</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .students-table { width: 100%; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        table { width: 100%; border-collapse: collapse; }
+        thead { background: var(--light-gray); }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid var(--border-color); font-size: 14px; }
+        th { font-weight: 600; color: var(--text-primary); }
+        tbody tr:hover { background: var(--light-gray); }
+        .grade-chip { padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 700; }
+        .grade-a { background: #D5F5E3; color: #1E8449; }
+        .grade-b { background: #D6EAF8; color: #1A5276; }
+        .grade-c { background: #FEF9E7; color: #B7950B; }
+        .grade-d { background: #FDEDEC; color: #C0392B; }
+        .view-btn { padding: 6px 14px; border-radius: 6px; border: none; cursor: pointer; font-size: 12px; font-weight: 500; background: #E8F4FD; color: var(--primary-color); }
+        .info-banner { background: #E8F4FD; border-left: 4px solid var(--primary-color); padding: 12px 16px; border-radius: 0 8px 8px 0; margin-bottom: 20px; font-size: 14px; color: #2C3E50; display: flex; align-items: center; gap: 10px; }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-graduation-cap"></i>
+                    <span>SmartSchool</span>
+                </div>
+            </div>
+            <nav class="sidebar-menu">
+                <a href="teacher.html" class="menu-item">
+                    <i class="fas fa-th-large"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="teacher-students.html" class="menu-item active">
+                    <i class="fas fa-user-graduate"></i>
+                    <span>Students</span>
+                </a>
+                <a href="classes.html" class="menu-item">
+                    <i class="fas fa-book"></i>
+                    <span>Classes</span>
+                </a>
+                <a href="attendance.html" class="menu-item">
+                    <i class="fas fa-user-check"></i>
+                    <span>Attendance</span>
+                </a>
+                <a href="grades.html" class="menu-item">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Grades</span>
+                </a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <div class="top-bar">
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search students..." id="searchInput" oninput="filterTable()">
+                </div>
+                <div class="top-bar-right">
+                    <button class="icon-btn">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge" id="notifCount">0</span>
+                    </button>
+                    <div class="user-profile">
+                        <div class="user-avatar" id="userAvatar">ST</div>
+                        <div class="user-info">
+                            <h4 id="userName">Teacher</h4>
+                            <p>Teacher</p>
+                        </div>
+                    </div>
+                    <button class="icon-btn" onclick="logout()">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="content-area">
+                <div class="welcome-section">
+                    <h1>My Students</h1>
+                    <p>View your assigned students and their academic performance.</p>
+                </div>
+
+                <div class="info-banner">
+                    <i class="fas fa-info-circle" style="color: var(--primary-color); font-size: 16px;"></i>
+                    <span>You have <strong>read-only</strong> access. Contact admin to make changes to student records.</span>
+                </div>
+
+                <div class="students-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Student Name</th>
+                                <th>Class</th>
+                                <th>Attendance</th>
+                                <th>Grade</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentsTableBody">
+                            <tr>
+                                <td colspan="6" style="text-align: center; padding: 40px; color: #7F8C8D;">
+                                    <i class="fas fa-spinner fa-spin"></i> Loading students...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="../assets/js/common.js"></script>
+    <script>
+        let allStudents = [];
+
+        // Teacher-only auth guard
+        (async () => {
+            const data = await checkAuthShared(['teacher']);
+            if (!data) return;
+            document.getElementById('userName').textContent = data.name;
+            document.getElementById('userAvatar').textContent = data.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+            loadStudents();
+            loadNotifications();
+        })();
+
+        async function loadStudents() {
+            try {
+                const response = await fetch('../api/students.php?action=list');
+                const data = await response.json();
+                if (data.success && data.students && data.students.length > 0) {
+                    allStudents = data.students;
+                    renderTable(allStudents);
+                } else { showDemoData(); }
+            } catch (e) { showDemoData(); }
+        }
+
+        function showDemoData() {
+            allStudents = [
+                { id: 1, student_name: 'Ali Hassan', email: 'ali@school.com', class: 'Grade 10A', attendance_percentage: 92, average_grade: 'A' },
+                { id: 2, student_name: 'Sara Khan', email: 'sara@school.com', class: 'Grade 11B', attendance_percentage: 88, average_grade: 'B+' },
+                { id: 3, student_name: 'Usman Ahmed', email: 'usman@school.com', class: 'Grade 9A', attendance_percentage: 95, average_grade: 'A-' },
+                { id: 4, student_name: 'Aisha Malik', email: 'aisha@school.com', class: 'Grade 10A', attendance_percentage: 78, average_grade: 'B' },
+                { id: 5, student_name: 'Hamza Raza', email: 'hamza@school.com', class: 'Grade 12A', attendance_percentage: 85, average_grade: 'C+' },
+            ];
+            renderTable(allStudents);
+        }
+
+        function gradeClass(g) {
+            if (!g) return '';
+            if (g.startsWith('A')) return 'grade-a';
+            if (g.startsWith('B')) return 'grade-b';
+            if (g.startsWith('C')) return 'grade-c';
+            return 'grade-d';
+        }
+
+        function renderTable(students) {
+            document.getElementById('studentsTableBody').innerHTML = students.map(s => `
+                <tr>
+                    <td>#${s.id}</td>
+                    <td><strong>${s.student_name}</strong></td>
+                    <td>${s.class}</td>
+                    <td>${s.attendance_percentage}%</td>
+                    <td><span class="grade-chip ${gradeClass(s.average_grade)}">${s.average_grade}</span></td>
+                    <td><button class="view-btn" onclick="viewStudent(${s.id})"><i class="fas fa-eye"></i> View</button></td>
+                </tr>
+            `).join('');
+        }
+
+        function filterTable() {
+            const q = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = allStudents.filter(s =>
+                s.student_name.toLowerCase().includes(q) ||
+                s.class.toLowerCase().includes(q) ||
+                (s.average_grade && s.average_grade.toLowerCase().includes(q))
+            );
+            renderTable(filtered);
+        }
+
+        function viewStudent(id) {
+            const s = allStudents.find(x => x.id == id);
+            if (!s) return;
+            alert(`Student Details\n\nName: ${s.student_name}\nClass: ${s.class}\nAttendance: ${s.attendance_percentage}%\nGrade: ${s.average_grade}`);
+        }
+    </script>
+</body>
+</html>

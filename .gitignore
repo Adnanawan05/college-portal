@@ -1,0 +1,10 @@
+# Database config (Contains credentials)
+# config/database.php
+
+# XAMPP/OS specific
+Thumbs.db
+.DS_Store
+*.log
+tmp/
+node_modules/
+.vscode/

@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parent Dashboard - SmartSchool</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-graduation-cap"></i>
+                    <span>SmartSchool</span>
+                </div>
+            </div>
+            <nav class="sidebar-menu">
+                <a href="parent.html" class="menu-item active">
+                    <i class="fas fa-th-large"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="grades.html" class="menu-item">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Grades</span>
+                </a>
+                <a href="attendance.html" class="menu-item">
+                    <i class="fas fa-user-check"></i>
+                    <span>Attendance</span>
+                </a>
+                <a href="classes.html" class="menu-item">
+                    <i class="fas fa-book"></i>
+                    <span>Classes</span>
+                </a>
+            </nav>
+        </aside>
+        
+        <main class="main-content">
+            <div class="top-bar">
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search...">
+                </div>
+                <div class="top-bar-right">
+                    <button class="icon-btn">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge" id="notifCount">0</span>
+                    </button>
+                    <div class="user-profile">
+                        <div class="user-avatar" id="userAvatar">LP</div>
+                        <div class="user-info">
+                            <h4 id="userName">Parent</h4>
+                            <p>Parent</p>
+                        </div>
+                    </div>
+                    <button class="icon-btn" onclick="logout()">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="content-area">
+                <div class="welcome-section">
+                    <h1>Welcome back, <span id="welcomeName">Parent</span>!</h1>
+                    <p>Here's what's happening with your child today.</p>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-title">Child's Attendance</span>
+                            <div class="stat-icon"><i class="fas fa-user-check"></i></div>
+                        </div>
+                        <div class="stat-value" id="childAttendance">95%</div>
+                        <div class="stat-change positive">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>+2% from last month</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-title">Average Grade</span>
+                            <div class="stat-icon"><i class="fas fa-chart-line"></i></div>
+                        </div>
+                        <div class="stat-value" id="averageGrade">B+</div>
+                        <div class="stat-change positive">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>+5% from last month</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-title">Pending Fees</span>
+                            <div class="stat-icon"><i class="fas fa-dollar-sign"></i></div>
+                        </div>
+                        <div class="stat-value" id="pendingFees">$250</div>
+                        <div class="stat-change negative">
+                            <i class="fas fa-arrow-down"></i>
+                            <span>Due this month</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-title">Unread Messages</span>
+                            <div class="stat-icon"><i class="fas fa-envelope"></i></div>
+                        </div>
+                        <div class="stat-value" id="unreadMessages">2</div>
+                        <div class="stat-change positive">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>+2 from last week</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="content-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Child's Progress</h3>
+                            <button onclick="window.location.href='grades.html'">View Details</button>
+                        </div>
+                        <div id="childProgress">
+                            <div class="progress-item">
+                                <div class="progress-header">
+                                    <span>Mathematics</span>
+                                    <span>88%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 88%"></div>
+                                </div>
+                            </div>
+                            <div class="progress-item">
+                                <div class="progress-header">
+                                    <span>English</span>
+                                    <span>92%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 92%"></div>
+                                </div>
+                            </div>
+                            <div class="progress-item">
+                                <div class="progress-header">
+                                    <span>Science</span>
+                                    <span>78%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 78%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Upcoming Events</h3>
+                            <button>View All</button>
+                        </div>
+                        <div id="upcomingEvents">
+                            <div class="event-item">
+                                <div class="event-info">
+                                    <h4>Parent-Teacher Meeting</h4>
+                                    <p>Math Teacher</p>
+                                </div>
+                                <span class="event-status scheduled">Scheduled</span>
+                            </div>
+                            <div class="event-item">
+                                <div class="event-info">
+                                    <h4>Science Fair</h4>
+                                    <p>Annual Exhibition</p>
+                                </div>
+                                <span class="event-status next-week">Next Week</span>
+                            </div>
+                            <div class="event-item">
+                                <div class="event-info">
+                                    <h4>Fee Payment Due</h4>
+                                    <p>Monthly Tuition</p>
+                                </div>
+                                <span class="event-status overdue">5 Days</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Academic Performance Trend</h3>
+                        <button>View Details</button>
+                    </div>
+                    <canvas id="performanceChart" height="200"></canvas>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="../assets/js/common.js"></script>
+    <script src="../assets/js/parent.js"></script>
+</body>
+</html>

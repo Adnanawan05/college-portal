@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Attendance - SmartSchool</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .students-table { width: 100%; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        table { width: 100%; border-collapse: collapse; }
+        thead { background: var(--light-gray); }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid var(--border-color); }
+        th { font-weight: 600; color: var(--text-primary); }
+        tbody tr:hover { background: var(--light-gray); }
+        .status-badge { padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+        .status-present { background: #D5F5E3; color: #1E8449; }
+        .status-absent { background: #FDEDEC; color: #C0392B; }
+        .status-late { background: #FEF9E7; color: #B7950B; }
+        .action-btn { padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer; font-size: 12px; margin-right: 5px; font-weight: 500; }
+        .btn-view { background: #E8F4FD; color: var(--primary-color); }
+        .btn-edit { background: #FFF4E5; color: #E67E22; }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-graduation-cap"></i>
+                    <span>SmartSchool</span>
+                </div>
+            </div>
+            <nav class="sidebar-menu" id="sidebarNav"></nav>
+        </aside>
+
+        <main class="main-content">
+            <div class="top-bar">
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search attendance..." id="searchInput" oninput="filterTable()">
+                </div>
+                <div class="top-bar-right">
+                    <button class="icon-btn">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge" id="notifCount">0</span>
+                    </button>
+                    <div class="user-profile">
+                        <div class="user-avatar" id="userAvatar">U</div>
+                        <div class="user-info">
+                            <h4 id="userName">User</h4>
+                            <p id="userRole">Loading...</p>
+                        </div>
+                    </div>
+                    <button class="icon-btn" onclick="logout()">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="content-area">
+                <div class="welcome-section">
+                    <h1>Attendance</h1>
+                    <p id="pageDesc">View attendance records.</p>
+                </div>
+
+                <div class="students-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Student Name</th>
+                                <th>Class</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Percentage</th>
+                                <th id="actionHeader">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="attendanceTableBody">
+                            <tr><td colspan="7" style="text-align:center;padding:40px;color:#7F8C8D;"><i class="fas fa-spinner fa-spin"></i> Loading attendance...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Edit Attendance Modal -->
+    <div class="modal-overlay" id="editModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Edit Attendance</h2>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <form id="editForm" onsubmit="saveEdit(event)">
+                <input type="hidden" id="editId">
+                <div class="form-group">
+                    <label>Student Name</label>
+                    <input type="text" id="editName" disabled>
+                </div>
+                <div class="form-group">
+                    <label>Status</label>
+                    <select id="editStatus" required>
+                        <option value="present">Present</option>
+                        <option value="absent">Absent</option>
+                        <option value="late">Late</option>
+                    </select>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn-save">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script src="../assets/js/common.js"></script>
+    <script>
+        let userRole = '';
+        let allAttendance = [];
+
+        const SIDEBAR_NAVS = {
+            admin: `
+                <a href="admin.html" class="menu-item"><i class="fas fa-th-large"></i><span>Dashboard</span></a>
+                <a href="students.html" class="menu-item"><i class="fas fa-user-graduate"></i><span>Students</span></a>
+                <a href="teachers.html" class="menu-item"><i class="fas fa-chalkboard-teacher"></i><span>Teachers</span></a>
+                <a href="classes.html" class="menu-item"><i class="fas fa-book"></i><span>Classes</span></a>
+                <a href="attendance.html" class="menu-item active"><i class="fas fa-user-check"></i><span>Attendance</span></a>
+                <a href="grades.html" class="menu-item"><i class="fas fa-chart-line"></i><span>Grades</span></a>`,
+            teacher: `
+                <a href="teacher.html" class="menu-item"><i class="fas fa-th-large"></i><span>Dashboard</span></a>
+                <a href="teacher-students.html" class="menu-item"><i class="fas fa-user-graduate"></i><span>Students</span></a>
+                <a href="classes.html" class="menu-item"><i class="fas fa-book"></i><span>Classes</span></a>
+                <a href="attendance.html" class="menu-item active"><i class="fas fa-user-check"></i><span>Attendance</span></a>
+                <a href="grades.html" class="menu-item"><i class="fas fa-chart-line"></i><span>Grades</span></a>`,
+            student: `
+                <a href="student.html" class="menu-item"><i class="fas fa-th-large"></i><span>Dashboard</span></a>
+                <a href="classes.html" class="menu-item"><i class="fas fa-book"></i><span>Classes</span></a>
+                <a href="grades.html" class="menu-item"><i class="fas fa-chart-line"></i><span>Grades</span></a>
+                <a href="attendance.html" class="menu-item active"><i class="fas fa-user-check"></i><span>Attendance</span></a>`,
+            parent: `
+                <a href="parent.html" class="menu-item"><i class="fas fa-th-large"></i><span>Dashboard</span></a>
+                <a href="classes.html" class="menu-item"><i class="fas fa-book"></i><span>Classes</span></a>
+                <a href="grades.html" class="menu-item"><i class="fas fa-chart-line"></i><span>Grades</span></a>
+                <a href="attendance.html" class="menu-item active"><i class="fas fa-user-check"></i><span>Attendance</span></a>`,
+        };
+
+        (async () => {
+            const data = await checkAuthShared();
+            if (!data) return;
+            userRole = data.role;
+            document.getElementById('userName').textContent = data.name;
+            document.getElementById('userRole').textContent = data.role.charAt(0).toUpperCase() + data.role.slice(1);
+            document.getElementById('userAvatar').textContent = data.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
+            document.getElementById('sidebarNav').innerHTML = SIDEBAR_NAVS[data.role] || SIDEBAR_NAVS.student;
+
+            if (data.role === 'student') {
+                document.getElementById('pageDesc').textContent = 'Your personal attendance record.';
+            } else if (data.role === 'parent') {
+                document.getElementById('pageDesc').textContent = "Your child's attendance record.";
+            }
+            loadAttendance();
+            loadNotifications();
+        })();
+
+        async function loadAttendance() {
+            try {
+                const res = await fetch('../api/attendance.php?action=list');
+                const data = await res.json();
+                if (data.success) {
+                    allAttendance = data.attendance;
+                    renderTable(allAttendance);
+                }
+            } catch(e) {
+                console.error('Failed to load attendance:', e);
+            }
+        }
+
+        function renderTable(records) {
+            const canEdit = userRole === 'admin' || userRole === 'teacher';
+            if (!canEdit) document.getElementById('actionHeader').style.display = 'none';
+
+            document.getElementById('attendanceTableBody').innerHTML = records.map(r => `
+                <tr>
+                    <td>#${r.id}</td>
+                    <td><strong>${r.student_name}</strong></td>
+                    <td>${r.class}</td>
+                    <td>${r.date}</td>
+                    <td><span class="status-badge status-${r.status}">${r.status.charAt(0).toUpperCase() + r.status.slice(1)}</span></td>
+                    <td>${r.attendance_percentage || 0}%</td>
+                    ${canEdit ? `<td>
+                        <button class="action-btn btn-view" onclick="viewRecord(${r.id})"><i class="fas fa-eye"></i> View</button>
+                        <button class="action-btn btn-edit" onclick="editRecord(${r.id})"><i class="fas fa-edit"></i> Edit</button>
+                    </td>` : '<td style="display:none"></td>'}
+                </tr>
+            `).join('');
+        }
+
+        function filterTable() {
+            const q = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = allAttendance.filter(r =>
+                r.student_name.toLowerCase().includes(q) ||
+                r.class.toLowerCase().includes(q) ||
+                r.status.toLowerCase().includes(q)
+            );
+            renderTable(filtered);
+        }
+
+        function editRecord(id) {
+            const r = allAttendance.find(x => x.id == id);
+            if (!r) return;
+            document.getElementById('editId').value = id;
+            document.getElementById('editName').value = r.student_name;
+            document.getElementById('editStatus').value = r.status;
+            document.getElementById('editModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('editModal').classList.remove('active');
+        }
+
+        async function saveEdit(e) {
+            e.preventDefault();
+            const id = document.getElementById('editId').value;
+            const status = document.getElementById('editStatus').value;
+            
+            try {
+                const fd = new FormData();
+                fd.append('action', 'update');
+                fd.append('id', id);
+                fd.append('status', status);
+                
+                const res = await fetch('../api/attendance.php', { method: 'POST', body: fd });
+                const data = await res.json();
+                
+                if (data.success) {
+                    showToast('Attendance updated successfully!');
+                    loadAttendance();
+                    closeModal();
+                } else {
+                    showToast(data.message || 'Update failed', true);
+                }
+            } catch(e) {
+                showToast('Connection error', true);
+            }
+        }
+
+        function viewRecord(id) {
+            const r = allAttendance.find(x => x.id == id);
+            if (!r) return;
+            alert(`Attendance Details\n\nStudent: ${r.student_name}\nClass: ${r.class}\nDate: ${r.date}\nStatus: ${r.status.toUpperCase()}`);
+        }
+
+        function showToast(msg, isError = false) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.className = 'toast' + (isError ? ' error' : '');
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 3000);
+        }
+    </script>
+</body>
+</html>

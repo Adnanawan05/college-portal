@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Students Management - SmartSchool</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .page-actions { display: flex; justify-content: flex-end; margin-bottom: 20px; }
+        .btn-add { background: var(--primary-color); color: white; border: none; padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+        .btn-add:hover { background: #2980b9; }
+        .students-table { width: 100%; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        table { width: 100%; border-collapse: collapse; }
+        thead { background: var(--light-gray); }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid var(--border-color); }
+        th { font-weight: 600; color: var(--text-primary); }
+        tbody tr:hover { background: var(--light-gray); }
+        .action-btn { padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer; font-size: 12px; margin-right: 5px; font-weight: 500; }
+        .btn-view { background: #E8F4FD; color: var(--primary-color); }
+        .btn-edit { background: #FFF4E5; color: #E67E22; }
+        .btn-delete { background: #FFE5E5; color: #E74C3C; }
+
+        /* Modal */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+        .modal-overlay.active { display: flex; }
+        .modal { background: white; border-radius: 16px; padding: 32px; width: 100%; max-width: 500px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); position: relative; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .modal-header h2 { font-size: 20px; font-weight: 700; color: var(--text-primary); }
+        .modal-close { background: none; border: none; font-size: 20px; cursor: pointer; color: #7F8C8D; }
+        .modal .form-group { margin-bottom: 16px; }
+        .modal label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--text-primary); }
+        .modal input, .modal select { width: 100%; padding: 10px 14px; border: 2px solid var(--border-color); border-radius: 8px; font-size: 14px; outline: none; transition: border-color 0.2s; box-sizing: border-box; }
+        .modal input:focus, .modal select:focus { border-color: var(--primary-color); }
+        .modal-actions { display: flex; gap: 12px; margin-top: 24px; }
+        .btn-save { background: var(--primary-color); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; flex: 1; }
+        .btn-cancel { background: var(--light-gray); color: var(--text-primary); border: none; padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
+        .toast { position: fixed; bottom: 24px; right: 24px; background: #27AE60; color: white; padding: 14px 20px; border-radius: 10px; font-size: 14px; font-weight: 500; z-index: 2000; transform: translateY(80px); opacity: 0; transition: all 0.3s ease; }
+        .toast.show { transform: translateY(0); opacity: 1; }
+        .toast.error { background: #E74C3C; }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-graduation-cap"></i>
+                    <span>SmartSchool</span>
+                </div>
+            </div>
+            <nav class="sidebar-menu">
+                <a href="admin.html" class="menu-item">
+                    <i class="fas fa-th-large"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="students.html" class="menu-item active">
+                    <i class="fas fa-user-graduate"></i>
+                    <span>Students</span>
+                </a>
+                <a href="teachers.html" class="menu-item">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                    <span>Teachers</span>
+                </a>
+                <a href="classes.html" class="menu-item">
+                    <i class="fas fa-book"></i>
+                    <span>Classes</span>
+                </a>
+                <a href="attendance.html" class="menu-item">
+                    <i class="fas fa-user-check"></i>
+                    <span>Attendance</span>
+                </a>
+                <a href="grades.html" class="menu-item">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Grades</span>
+                </a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <div class="top-bar">
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search students..." id="searchInput" oninput="filterTable()">
+                </div>
+                <div class="top-bar-right">
+                    <button class="icon-btn" id="notificationBtn">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge" id="notifCount">0</span>
+                    </button>
+                    <div class="user-profile">
+                        <div class="user-avatar">JA</div>
+                        <div class="user-info">
+                            <h4 id="userName">Admin</h4>
+                            <p>Administrator</p>
+                        </div>
+                    </div>
+                    <button class="icon-btn" onclick="logout()">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="content-area">
+                <div class="welcome-section">
+                    <h1>Students Management</h1>
+                    <p>View and manage all students in the system.</p>
+                </div>
+
+                <div class="page-actions">
+                    <button class="btn-add" onclick="openAddModal()">
+                        <i class="fas fa-plus"></i> Add Student
+                    </button>
+                </div>
+
+                <div class="students-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Class</th>
+                                <th>Attendance</th>
+                                <th>Grade</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentsTableBody">
+                            <tr>
+                                <td colspan="7" style="text-align: center; padding: 40px; color: #7F8C8D;">
+                                    <i class="fas fa-spinner fa-spin"></i> Loading students...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add/Edit Student Modal -->
+    <div class="modal-overlay" id="studentModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="modalTitle">Add New Student</h2>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <form id="studentForm" onsubmit="saveStudent(event)">
+                <input type="hidden" id="editUserId">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="studentName" placeholder="Enter full name" required>
+                </div>
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="studentEmail" placeholder="Enter email address" required>
+                </div>
+                <div class="form-group">
+                    <label id="passwordLabel">Password</label>
+                    <input type="password" id="studentPassword" placeholder="Enter password" required>
+                </div>
+                <div class="form-group">
+                    <label>Class</label>
+                    <select id="studentClass" required>
+                        <option value="">Select class...</option>
+                        <option value="Grade 9A">Grade 9A</option>
+                        <option value="Grade 9B">Grade 9B</option>
+                        <option value="Grade 10A">Grade 10A</option>
+                        <option value="Grade 10B">Grade 10B</option>
+                        <option value="Grade 11A">Grade 11A</option>
+                        <option value="Grade 11B">Grade 11B</option>
+                        <option value="Grade 12A">Grade 12A</option>
+                        <option value="Grade 12B">Grade 12B</option>
+                    </select>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn-save" id="saveBtn">Add Student</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script src="../assets/js/common.js"></script>
+    <script>
+        let allStudents = [];
+
+        // Auth check — admin only
+        (async () => {
+            const data = await checkAuthShared(['admin']);
+            if (!data) return;
+            document.getElementById('userName').textContent = data.name;
+            loadStudents();
+            loadNotifications();
+        })();
+
+        async function loadStudents() {
+            try {
+                const response = await fetch('../api/students.php?action=list');
+                const data = await response.json();
+                const tbody = document.getElementById('studentsTableBody');
+
+                if (data.success && data.students && data.students.length > 0) {
+                    allStudents = data.students;
+                    renderTable(allStudents);
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:#7F8C8D;">No students found. Add one using the button above.</td></tr>';
+                }
+            } catch (error) {
+                showDemoData();
+            }
+        }
+
+        function showDemoData() {
+            allStudents = [
+                { id: 1, student_name: 'Ali Hassan', email: 'ali@school.com', class: 'Grade 10A', attendance_percentage: 92, average_grade: 'A' },
+                { id: 2, student_name: 'Sara Khan', email: 'sara@school.com', class: 'Grade 11B', attendance_percentage: 88, average_grade: 'B+' },
+                { id: 3, student_name: 'Usman Ahmed', email: 'usman@school.com', class: 'Grade 9A', attendance_percentage: 95, average_grade: 'A-' },
+            ];
+            renderTable(allStudents);
+        }
+
+        function renderTable(students) {
+            const tbody = document.getElementById('studentsTableBody');
+            tbody.innerHTML = students.map(s => `
+                <tr>
+                    <td>#${s.id}</td>
+                    <td><strong>${s.student_name}</strong></td>
+                    <td>${s.email || 'N/A'}</td>
+                    <td>${s.class}</td>
+                    <td>${s.attendance_percentage}%</td>
+                    <td>${s.average_grade}</td>
+                    <td>
+                        <button class="action-btn btn-view" onclick="viewStudent(${s.id})"><i class="fas fa-eye"></i> View</button>
+                        <button class="action-btn btn-edit" onclick="editStudent(${s.id})"><i class="fas fa-edit"></i> Edit</button>
+                        <button class="action-btn btn-delete" onclick="deleteStudent(${s.id}, '${s.student_name}')"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function filterTable() {
+            const q = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = allStudents.filter(s =>
+                s.student_name.toLowerCase().includes(q) ||
+                (s.email && s.email.toLowerCase().includes(q)) ||
+                s.class.toLowerCase().includes(q)
+            );
+            renderTable(filtered);
+        }
+
+        function openAddModal() {
+            document.getElementById('modalTitle').textContent = 'Add New Student';
+            document.getElementById('saveBtn').textContent = 'Add Student';
+            document.getElementById('studentForm').reset();
+            document.getElementById('editUserId').value = '';
+            document.getElementById('studentPassword').required = true;
+            document.getElementById('passwordLabel').textContent = 'Password';
+            document.getElementById('studentModal').classList.add('active');
+        }
+
+        function editStudent(id) {
+            const s = allStudents.find(x => x.id == id);
+            if (!s) return;
+            document.getElementById('modalTitle').textContent = 'Edit Student';
+            document.getElementById('saveBtn').textContent = 'Save Changes';
+            document.getElementById('editUserId').value = id;
+            document.getElementById('studentName').value = s.student_name;
+            document.getElementById('studentEmail').value = s.email || '';
+            document.getElementById('studentPassword').value = '';
+            document.getElementById('studentPassword').required = false;
+            document.getElementById('passwordLabel').textContent = 'New Password (leave blank to keep current)';
+            document.getElementById('studentClass').value = s.class;
+            document.getElementById('studentModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('studentModal').classList.remove('active');
+        }
+
+        async function saveStudent(e) {
+            e.preventDefault();
+            const editId = document.getElementById('editUserId').value;
+            const name = document.getElementById('studentName').value;
+            const email = document.getElementById('studentEmail').value;
+            const password = document.getElementById('studentPassword').value;
+            const studentClass = document.getElementById('studentClass').value;
+
+            if (editId) {
+                // Edit existing
+                try {
+                    const fd = new FormData();
+                    fd.append('action', 'update_student');
+                    fd.append('id', editId);
+                    fd.append('name', name);
+                    fd.append('email', email);
+                    fd.append('class', studentClass);
+                    if (password) fd.append('password', password);
+                    
+                    const res = await fetch('../api/students.php', { method: 'POST', body: fd });
+                    const data = await res.json();
+                    
+                    if (data.success) {
+                        showToast('Student updated successfully!');
+                        loadStudents();
+                    } else {
+                        showToast(data.message || 'Update failed', true);
+                    }
+                } catch(e) {
+                    showToast('Connection error', true);
+                }
+            } else {
+                // Add new student via API
+                try {
+                    const fd = new FormData();
+                    fd.append('action', 'signup');
+                    fd.append('name', name);
+                    fd.append('email', email);
+                    fd.append('password', password);
+                    fd.append('role', 'student');
+                    fd.append('phone', '');
+                    fd.append('class', studentClass);
+                    const res = await fetch('../api/auth.php', { method: 'POST', body: fd });
+                    const data = await res.json();
+                    if (data.success) {
+                        showToast('Student added successfully!');
+                        loadStudents();
+                    } else {
+                        showToast(data.message || 'Failed to add student', true);
+                    }
+                } catch(err) {
+                    showToast('Connection error', true);
+                }
+            }
+            closeModal();
+        }
+
+        function viewStudent(id) {
+            const s = allStudents.find(x => x.id == id);
+            if (!s) return;
+            alert(`Student Details\n\nName: ${s.student_name}\nEmail: ${s.email || 'N/A'}\nClass: ${s.class}\nAttendance: ${s.attendance_percentage}%\nGrade: ${s.average_grade}`);
+        }
+
+        async function deleteStudent(id, name) {
+            if (!confirm(`Are you sure you want to delete student "${name}"?`)) return;
+            
+            try {
+                const fd = new FormData();
+                fd.append('action', 'delete_student');
+                fd.append('id', id);
+                const res = await fetch('../api/students.php', { method: 'POST', body: fd });
+                const data = await res.json();
+                
+                if (data.success) {
+                    showToast('Student deleted successfully!');
+                    loadStudents();
+                } else {
+                    showToast(data.message || 'Deletion failed', true);
+                }
+            } catch(e) {
+                showToast('Connection error', true);
+            }
+        }
+
+        function showToast(msg, isError = false) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.className = 'toast' + (isError ? ' error' : '');
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 3000);
+        }
+
+        // Close modal on overlay click
+        document.getElementById('studentModal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+    </script>
+</body>
+</html>

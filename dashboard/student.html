@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard - SmartSchool</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-graduation-cap"></i>
+                    <span>SmartSchool</span>
+                </div>
+            </div>
+            
+            <nav class="sidebar-menu">
+                <a href="student.html" class="menu-item active">
+                    <i class="fas fa-th-large"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="classes.html" class="menu-item">
+                    <i class="fas fa-book"></i>
+                    <span>Classes</span>
+                </a>
+                <a href="grades.html" class="menu-item">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Grades</span>
+                </a>
+                <a href="attendance.html" class="menu-item">
+                    <i class="fas fa-user-check"></i>
+                    <span>Attendance</span>
+                </a>
+            </nav>
+        </aside>
+        
+        <main class="main-content">
+            <div class="top-bar">
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search classes, grades...">
+                </div>
+                
+                <div class="top-bar-right">
+                    <button class="icon-btn">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge" id="notifCount">0</span>
+                    </button>
+                    <div class="user-profile">
+                        <div class="user-avatar" id="userAvatar">ST</div>
+                        <div class="user-info">
+                            <h4 id="userName">Student</h4>
+                            <p>Student</p>
+                        </div>
+                    </div>
+                    <button class="icon-btn" onclick="logout()">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="content-area">
+                <div class="welcome-section">
+                    <h1>Welcome back, <span id="welcomeName">Student</span>!</h1>
+                    <p>Here's your academic summary for today.</p>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-title">Attendance</span>
+                            <div class="stat-icon"><i class="fas fa-user-check"></i></div>
+                        </div>
+                        <div class="stat-value" id="attendance">92%</div>
+                        <div class="stat-change positive">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>+2% from last month</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-title">Average Grade</span>
+                            <div class="stat-icon"><i class="fas fa-chart-line"></i></div>
+                        </div>
+                        <div class="stat-value" id="averageGrade">A-</div>
+                        <div class="stat-change positive">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>+3 from last month</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-title">Pending Homework</span>
+                            <div class="stat-icon"><i class="fas fa-file-alt"></i></div>
+                        </div>
+                        <div class="stat-value" id="pendingHomework">3</div>
+                        <div class="stat-change negative">
+                            <i class="fas fa-arrow-down"></i>
+                            <span>3 from last week</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-title">Upcoming Exams</span>
+                            <div class="stat-icon"><i class="fas fa-clipboard-check"></i></div>
+                        </div>
+                        <div class="stat-value" id="upcomingExams">2</div>
+                        <div class="stat-change positive">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>+1 from last week</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="content-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Today's Classes</h3>
+                            <button onclick="window.location.href='classes.html'">View All</button>
+                        </div>
+                        <div>
+                            <div class="schedule-item">
+                                <div class="schedule-info">
+                                    <h4>Mathematics</h4>
+                                    <p>Mr. Smith - Room 101</p>
+                                </div>
+                                <span class="event-status scheduled">8:00 AM</span>
+                            </div>
+                            <div class="schedule-item">
+                                <div class="schedule-info">
+                                    <h4>English Literature</h4>
+                                    <p>Mrs. Johnson - Room 205</p>
+                                </div>
+                                <span class="event-status next-week">11:00 AM</span>
+                            </div>
+                            <div class="schedule-item">
+                                <div class="schedule-info">
+                                    <h4>Science</h4>
+                                    <p>Dr. Brown - Lab 1</p>
+                                </div>
+                                <span class="event-status next-week">2:00 PM</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Recent Grades</h3>
+                            <button onclick="window.location.href='grades.html'">View All</button>
+                        </div>
+                        <div>
+                            <div class="grade-item">
+                                <div class="grade-info">
+                                    <h4>Mathematics Quiz</h4>
+                                    <p>Chapter 5 - Algebra</p>
+                                </div>
+                                <span class="grade-badge a">A</span>
+                            </div>
+                            <div class="grade-item">
+                                <div class="grade-info">
+                                    <h4>English Essay</h4>
+                                    <p>Shakespeare Analysis</p>
+                                </div>
+                                <span class="grade-badge b">B+</span>
+                            </div>
+                            <div class="grade-item">
+                                <div class="grade-info">
+                                    <h4>Science Lab</h4>
+                                    <p>Chemical Reactions</p>
+                                </div>
+                                <span class="grade-badge a">A</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-top: 20px;">
+                    <div class="card-header">
+                        <h3>My Attendance Record</h3>
+                        <button onclick="window.location.href='attendance.html'">View Full Record</button>
+                    </div>
+                    <div style="padding: 20px;">
+                        <div class="progress-item">
+                            <div class="progress-header">
+                                <span>Overall Attendance</span>
+                                <span id="attendancePct">92%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="attendanceBar" style="width: 92%"></div>
+                            </div>
+                        </div>
+                        <div class="progress-item" style="margin-top: 14px;">
+                            <div class="progress-header">
+                                <span>Mathematics</span><span>95%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 95%"></div>
+                            </div>
+                        </div>
+                        <div class="progress-item" style="margin-top: 14px;">
+                            <div class="progress-header">
+                                <span>Science</span><span>88%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 88%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script src="../assets/js/common.js"></script>
+    <script>
+        // Auth check — student only, redirects to login if not authenticated
+        (async () => {
+            const data = await checkAuthShared(['student']);
+            if (!data) return;
+
+            const name = data.name || 'Student';
+            document.getElementById('userName').textContent = name;
+            document.getElementById('welcomeName').textContent = name;
+            document.getElementById('userAvatar').textContent = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
+
+            // Try to load live data from API
+            try {
+                const res = await fetch('../api/dashboard.php?role=student');
+                const resp = await res.json();
+                if (resp.success && resp.stats) {
+                    document.getElementById('attendance').textContent = (resp.stats.attendance || '92') + '%';
+                    document.getElementById('averageGrade').textContent = resp.stats.average_grade || 'A-';
+                    document.getElementById('pendingHomework').textContent = resp.stats.pending_homework || '3';
+                    document.getElementById('upcomingExams').textContent = resp.stats.upcoming_exams || '2';
+                    const pct = resp.stats.attendance || 92;
+                    document.getElementById('attendancePct').textContent = pct + '%';
+                    document.getElementById('attendanceBar').style.width = pct + '%';
+                }
+            } catch(e) {
+                // Static demo data already in HTML
+            }
+
+            loadNotifications();
+        })();
+    </script>
+</body>
+</html>

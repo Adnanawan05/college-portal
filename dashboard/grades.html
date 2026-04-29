@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grades - SmartSchool</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .students-table { width: 100%; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        table { width: 100%; border-collapse: collapse; }
+        thead { background: var(--light-gray); }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid var(--border-color); }
+        th { font-weight: 600; color: var(--text-primary); }
+        tbody tr:hover { background: var(--light-gray); }
+        .grade-badge { padding: 4px 12px; border-radius: 12px; font-size: 13px; font-weight: 700; }
+        .grade-a { background: #D5F5E3; color: #1E8449; }
+        .grade-b { background: #D6EAF8; color: #1A5276; }
+        .grade-c { background: #FEF9E7; color: #B7950B; }
+        .grade-d { background: #FDEDEC; color: #C0392B; }
+        .action-btn { padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer; font-size: 12px; margin-right: 5px; font-weight: 500; }
+        .btn-view { background: #E8F4FD; color: var(--primary-color); }
+        .btn-edit { background: #FFF4E5; color: #E67E22; }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-graduation-cap"></i>
+                    <span>SmartSchool</span>
+                </div>
+            </div>
+            <nav class="sidebar-menu" id="sidebarNav"></nav>
+        </aside>
+
+        <main class="main-content">
+            <div class="top-bar">
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search grades..." id="searchInput" oninput="filterTable()">
+                </div>
+                <div class="top-bar-right">
+                    <button class="icon-btn">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge" id="notifCount">0</span>
+                    </button>
+                    <div class="user-profile">
+                        <div class="user-avatar" id="userAvatar">U</div>
+                        <div class="user-info">
+                            <h4 id="userName">User</h4>
+                            <p id="userRole">Loading...</p>
+                        </div>
+                    </div>
+                    <button class="icon-btn" onclick="logout()">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="content-area">
+                <div class="welcome-section">
+                    <h1>Grades</h1>
+                    <p id="pageDesc">View academic performance and grades.</p>
+                </div>
+
+                <div class="students-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Student Name</th>
+                                <th>Class</th>
+                                <th>Subject</th>
+                                <th>Score</th>
+                                <th>Grade</th>
+                                <th id="actionHeader">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="gradesTableBody">
+                            <tr><td colspan="7" style="text-align:center;padding:40px;color:#7F8C8D;"><i class="fas fa-spinner fa-spin"></i> Loading grades...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="../assets/js/common.js"></script>
+    <script>
+        let userRole = '';
+        const demoGrades = [
+            { id: 1, name: 'Ali Hassan', class: 'Grade 10A', subject: 'Mathematics', score: 92, grade: 'A' },
+            { id: 2, name: 'Sara Khan', class: 'Grade 11B', subject: 'Physics', score: 85, grade: 'B+' },
+            { id: 3, name: 'Usman Ahmed', class: 'Grade 9A', subject: 'Chemistry', score: 78, grade: 'B' },
+            { id: 4, name: 'Aisha Malik', class: 'Grade 10A', subject: 'English', score: 95, grade: 'A+' },
+            { id: 5, name: 'Hamza Raza', class: 'Grade 12A', subject: 'Biology', score: 62, grade: 'C' },
+        ];
+        let allGrades = [...demoGrades];
+
+        const SIDEBAR_NAVS = {
+            admin: `
+                <a href="admin.html" class="menu-item"><i class="fas fa-th-large"></i><span>Dashboard</span></a>
+                <a href="students.html" class="menu-item"><i class="fas fa-user-graduate"></i><span>Students</span></a>
+                <a href="teachers.html" class="menu-item"><i class="fas fa-chalkboard-teacher"></i><span>Teachers</span></a>
+                <a href="classes.html" class="menu-item"><i class="fas fa-book"></i><span>Classes</span></a>
+                <a href="attendance.html" class="menu-item"><i class="fas fa-user-check"></i><span>Attendance</span></a>
+                <a href="grades.html" class="menu-item active"><i class="fas fa-chart-line"></i><span>Grades</span></a>`,
+            teacher: `
+                <a href="teacher.html" class="menu-item"><i class="fas fa-th-large"></i><span>Dashboard</span></a>
+                <a href="teacher-students.html" class="menu-item"><i class="fas fa-user-graduate"></i><span>Students</span></a>
+                <a href="classes.html" class="menu-item"><i class="fas fa-book"></i><span>Classes</span></a>
+                <a href="attendance.html" class="menu-item"><i class="fas fa-user-check"></i><span>Attendance</span></a>
+                <a href="grades.html" class="menu-item active"><i class="fas fa-chart-line"></i><span>Grades</span></a>`,
+            student: `
+                <a href="student.html" class="menu-item"><i class="fas fa-th-large"></i><span>Dashboard</span></a>
+                <a href="classes.html" class="menu-item"><i class="fas fa-book"></i><span>Classes</span></a>
+                <a href="grades.html" class="menu-item active"><i class="fas fa-chart-line"></i><span>Grades</span></a>
+                <a href="attendance.html" class="menu-item"><i class="fas fa-user-check"></i><span>Attendance</span></a>`,
+            parent: `
+                <a href="parent.html" class="menu-item"><i class="fas fa-th-large"></i><span>Dashboard</span></a>
+                <a href="classes.html" class="menu-item"><i class="fas fa-book"></i><span>Classes</span></a>
+                <a href="grades.html" class="menu-item active"><i class="fas fa-chart-line"></i><span>Grades</span></a>
+                <a href="attendance.html" class="menu-item"><i class="fas fa-user-check"></i><span>Attendance</span></a>`,
+        };
+
+        function getGradeClass(g) {
+            if (g.startsWith('A')) return 'grade-a';
+            if (g.startsWith('B')) return 'grade-b';
+            if (g.startsWith('C')) return 'grade-c';
+            return 'grade-d';
+        }
+
+        (async () => {
+            const data = await checkAuth();
+            if (!data) return;
+            userRole = data.role;
+            document.getElementById('userName').textContent = data.name;
+            document.getElementById('userRole').textContent = data.role.charAt(0).toUpperCase() + data.role.slice(1);
+            document.getElementById('userAvatar').textContent = data.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
+            document.getElementById('sidebarNav').innerHTML = SIDEBAR_NAVS[data.role] || SIDEBAR_NAVS.student;
+
+            if (data.role === 'student') {
+                document.getElementById('pageDesc').textContent = 'Your academic performance and grades.';
+            }
+            renderTable(allGrades);
+            loadNotifications();
+        })();
+
+        function renderTable(grades) {
+            const canEdit = userRole === 'admin' || userRole === 'teacher';
+            if (!canEdit) document.getElementById('actionHeader').style.display = 'none';
+
+            document.getElementById('gradesTableBody').innerHTML = grades.map(g => `
+                <tr>
+                    <td>#${g.id}</td>
+                    <td><strong>${g.name}</strong></td>
+                    <td>${g.class}</td>
+                    <td>${g.subject}</td>
+                    <td>${g.score}%</td>
+                    <td><span class="grade-badge ${getGradeClass(g.grade)}">${g.grade}</span></td>
+                    ${canEdit ? `<td>
+                        <button class="action-btn btn-view"><i class="fas fa-eye"></i> View</button>
+                        <button class="action-btn btn-edit"><i class="fas fa-edit"></i> Edit</button>
+                    </td>` : '<td style="display:none"></td>'}
+                </tr>
+            `).join('');
+        }
+
+        function filterTable() {
+            const q = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = allGrades.filter(g =>
+                g.name.toLowerCase().includes(q) ||
+                g.class.toLowerCase().includes(q) ||
+                g.subject.toLowerCase().includes(q) ||
+                g.grade.toLowerCase().includes(q)
+            );
+            renderTable(filtered);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - SmartSchool</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-graduation-cap"></i>
+                    <span>SmartSchool</span>
+                </div>
+            </div>
+            
+            <nav class="sidebar-menu">
+                <a href="admin.html" class="menu-item active">
+                    <i class="fas fa-th-large"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="students.html" class="menu-item">
+                    <i class="fas fa-user-graduate"></i>
+                    <span>Students</span>
+                </a>
+                <a href="teachers.html" class="menu-item">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                    <span>Teachers</span>
+                </a>
+                <a href="classes.html" class="menu-item">
+                    <i class="fas fa-book"></i>
+                    <span>Classes</span>
+                </a>
+                <a href="attendance.html" class="menu-item">
+                    <i class="fas fa-user-check"></i>
+                    <span>Attendance</span>
+                </a>
+                <a href="grades.html" class="menu-item">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Grades</span>
+                </a>
+            </nav>
+        </aside>
+        
+        <main class="main-content">
+            <div class="top-bar">
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search students, teachers, classes...">
+                </div>
+                
+                <div class="top-bar-right">
+                    <button class="icon-btn" id="notificationBtn">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge" id="notifCount">0</span>
+                    </button>
+                    <button class="icon-btn">
+                        <i class="fas fa-cog"></i>
+                    </button>
+                    <div class="user-profile">
+                        <div class="user-avatar">JA</div>
+                        <div class="user-info">
+                            <h4 id="userName">John Admin</h4>
+                            <p>Administrator</p>
+                        </div>
+                    </div>
+                    <button class="icon-btn" onclick="logout()">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="content-area">
+                <div class="welcome-section">
+                    <h1>Welcome back, <span id="welcomeName">John Admin</span>!</h1>
+                    <p>Here's what's happening at your school today.</p>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-title">Total Students</span>
+                            <div class="stat-icon">
+                                <i class="fas fa-user-graduate"></i>
+                            </div>
+                        </div>
+                        <div class="stat-value" id="totalStudents">1,234</div>
+                        <div class="stat-change positive">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>+16% from last month</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-title">Total Teachers</span>
+                            <div class="stat-icon">
+                                <i class="fas fa-chalkboard-teacher"></i>
+                            </div>
+                        </div>
+                        <div class="stat-value" id="totalTeachers">89</div>
+                        <div class="stat-change positive">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>+3% from last month</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-title">Total Classes</span>
+                            <div class="stat-icon">
+                                <i class="fas fa-book"></i>
+                            </div>
+                        </div>
+                        <div class="stat-value" id="totalClasses">45</div>
+                        <div class="stat-change positive">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>+2% from last month</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-title">Monthly Revenue</span>
+                            <div class="stat-icon">
+                                <i class="fas fa-dollar-sign"></i>
+                            </div>
+                        </div>
+                        <div class="stat-value" id="monthlyRevenue">$45,231</div>
+                        <div class="stat-change positive">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>+8% from last month</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="content-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Student Enrollment Trends</h3>
+                            <button>View All</button>
+                        </div>
+                        <canvas id="enrollmentChart" height="200"></canvas>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Today's Attendance</h3>
+                            <button>View Details</button>
+                        </div>
+                        <canvas id="attendanceChart" height="200"></canvas>
+                        <div style="margin-top: 15px; text-align: center; font-size: 12px;">
+                            <div style="display: inline-block; margin: 0 10px;">
+                                <span style="display: inline-block; width: 10px; height: 10px; background: #27AE60; border-radius: 50%; margin-right: 5px;"></span>
+                                <span>Present (85%)</span>
+                            </div>
+                            <div style="display: inline-block; margin: 0 10px;">
+                                <span style="display: inline-block; width: 10px; height: 10px; background: #F39C12; border-radius: 50%; margin-right: 5px;"></span>
+                                <span>Late (8%)</span>
+                            </div>
+                            <div style="display: inline-block; margin: 0 10px;">
+                                <span style="display: inline-block; width: 10px; height: 10px; background: #E74C3C; border-radius: 50%; margin-right: 5px;"></span>
+                                <span>Absent (7%)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Recent Activities</h3>
+                        <button>View All</button>
+                    </div>
+                    <div id="recentActivities">
+                        <div class="event-item">
+                            <div class="event-info">
+                                <h4>New Student Enrollment</h4>
+                                <p>Emma Wilson joined Grade 10A</p>
+                            </div>
+                            <span style="font-size: 12px; color: #7F8C8D;">2 hours ago</span>
+                        </div>
+                        <div class="event-item">
+                            <div class="event-info">
+                                <h4>Teacher Assignment</h4>
+                                <p>Mr. Johnson assigned to Physics - Grade 11B</p>
+                            </div>
+                            <span style="font-size: 12px; color: #7F8C8D;">5 hours ago</span>
+                        </div>
+                        <div class="event-item">
+                            <div class="event-info">
+                                <h4>Fee Payment Received</h4>
+                                <p>Payment of $500 received from John Doe</p>
+                            </div>
+                            <span style="font-size: 12px; color: #7F8C8D;">1 day ago</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="../assets/js/common.js"></script>
+    <script src="../assets/js/admin.js"></script>
+</body>
+</html>
